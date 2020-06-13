@@ -34,3 +34,9 @@ mkdir scene_splits
 
 * Download the scene splits into the "scene_splits" directory. The train-validation split is available <a href="https://github.com/RobertSamoilescu/UPB-Dataset-Split">here</a>.
 In the "scene_splits" directory you should have: "train_scenes.txt" and "test_scenes.txt".
+
+## Train models
+./run_train.sh
+
+## Test models - Open-loop evaluation
+./run_test.sh

@@ -36,7 +36,11 @@ mkdir scene_splits
 In the "scene_splits" directory you should have: "train_scenes.txt" and "test_scenes.txt".
 
 ## Train models
+```shell
 ./run_train.sh
+```
 
 ## Test models - Open-loop evaluation
+```shell
 ./run_test.sh
+```

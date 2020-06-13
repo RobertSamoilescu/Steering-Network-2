@@ -1,11 +1,11 @@
 # Steering-Network-2
 
 <p align='center'>
-  <img src='sample/sample1' alt='sample 1' width=1024/>
+  <img src='sample/sample1.png' alt='sample 1' width=1024/>
 </p>
 
 <p align='center'
-  <img src='sample/sample2' alt='sample 2' width=1024/>
+  <img src='sample/sample2.png' alt='sample 2' width=1024/>
 </p>
 
 ## Pre-requisits

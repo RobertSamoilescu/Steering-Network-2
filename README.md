@@ -53,8 +53,8 @@ In the "scene_splits" directory you should have: "train_scenes.txt" and "test_sc
 ./run_test.sh
 ```
 
+<!--
 ## Results - Open-loop evaluation
-
 | Model  | Speed | Stacked    | Disp(aux)  | Flow(aux) | MEAN | STD  | MIN  | MAX   |
 | ------ | ----- | ---        | ---------- | --------- | ---- | ---- | ---- | ----  |
 | SIMPLE | YES   | NO         | NO         | NO        | 0.755| 1.008| 0.003|14.118 |
@@ -63,8 +63,6 @@ In the "scene_splits" directory you should have: "train_scenes.txt" and "test_sc
 | RESNET | YES   | NO         | YES        | NO        | 0.684| 1.266| 0.001|13.099 |
 | SIMPLE | YES   | NO         | YES        | YES       | 0.443| 0.859| 0.001|16.358 |
 | RESNET | YES   | NO         | YES        | YES       | 0.426| 0.870| 0.000|10.500 |
-
-
 | Model  | Speed | Stacked    | Disp(aux)  | Flow(aux) | MEAN | STD  | MIN  | MAX  |
 | ------ | ----- | ---        | ---------- | --------- | ---- | ---- | ---- | ---- |
 | SIMPLE | NO    | YES        | NO         | NO        | 0.470| 0.884| 0.001|15.600|
@@ -73,3 +71,4 @@ In the "scene_splits" directory you should have: "train_scenes.txt" and "test_sc
 | RESNET | NO    | YES        | YES        | NO        | 0.418| 0.921| 0.000|12.379|
 | SIMPLE | NO    | YES        | YES        | YES       | 0.457| 0.820| 0.001|15.430|
 | RESNET | NO    | YES        | YES        | YES       | 0.435| 0.953| 0.000|11.929|
+-->

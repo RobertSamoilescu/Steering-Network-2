@@ -21,8 +21,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--src_dir", type=str, help="videos dataset directory")
 parser.add_argument("--dst_dir", type=str, help="destination dirctory")
 parser.add_argument("--camera_idx", action="store_true", help="if scenes contains camera index")
-parser.add_argument("--width", type=int, help="image width", default=512)
-parser.add_argument("--height", type=int, help="image height", default=256)
+parser.add_argument("--width", type=int, help="image width", default=256)
+parser.add_argument("--height", type=int, help="image height", default=128)
 args = parser.parse_args()
 
 # load monodepth and flow

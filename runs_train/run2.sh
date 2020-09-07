@@ -17,3 +17,7 @@ python3 train.py \
 	--use_disp \
 	--use_balance \
 	--dataset_dir $DATASET_DIR\
+	--step_size 1000\
+	--num_epochs 1000\
+	--optimizer rmsprop\
+	--weight_decay 0.0001\

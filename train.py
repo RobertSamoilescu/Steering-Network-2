@@ -13,12 +13,15 @@ from models.resnet import *
 from util.dataset import *
 from util.vis import *
 from util.io import *
+from util.early import *
 
 from tqdm import tqdm
+import numpy as np
+import random
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--lr", type=float, default=1e-4, help="learning rate")
-parser.add_argument("--step_size", type=int, default=5, help="scheduler learning rate step size")
+parser.add_argument("--lr", type=float, default=1e-5, help="learning rate")
+parser.add_argument("--step_size", type=int, default=10, help="scheduler learning rate step size")
 parser.add_argument("--batch_size", type=int, default=12, help="batch size")
 parser.add_argument("--log_interval", type=int, default=50, help="number of batches to log after")
 parser.add_argument("--vis_interval", type=int, default=500, help="number of batches to visualize after")
@@ -28,7 +31,7 @@ parser.add_argument("--vis_dir", type=str, default="./snapshots", help="visualiz
 parser.add_argument("--optimizer", type=str, default="adam", help="optimizer available: adam, rmsprop")
 parser.add_argument("--dataset_dir", type=str, default="./dataset", help="dataset directory")
 parser.add_argument("--num_workers", type=int, default=4, help="number of workers for dataloader")
-parser.add_argument("--num_epochs", type=int, default=10, help="number of epochs")
+parser.add_argument("--num_epochs", type=int, default=20, help="number of epochs")
 parser.add_argument("--num_vis", type=int, default=4, help="number of visualizations")
 parser.add_argument("--use_rgb", action="store_true", help="use rgb images as input")
 parser.add_argument("--use_speed", action="store_true", help="append speed to nvidia model")
@@ -39,10 +42,15 @@ parser.add_argument("--use_balance", action="store_true", help="balance dataset"
 parser.add_argument("--use_stacked", action="store_true", help="use stacked frames for resnet")
 parser.add_argument("--load_model", type=str, help="checkpoint name", default=None)
 parser.add_argument("--model", type=str, default="nvidia", help="[nvidia, resnet]")
+parser.add_argument("--patience", type=int, default=2, help="early stopping patience")
+parser.add_argument("--weight_decay", type=float, default=0, help="weight decay optimizer")
 args = parser.parse_args()
 
 # set seed
 torch.manual_seed(0)
+np.random.seed(0)
+random.seed(0)
+
 
 # define device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -98,9 +106,9 @@ criterion = nn.KLDivLoss(reduction="batchmean")
 
 # define optimizer
 if args.optimizer == "adam":
-	optimizer = optim.Adam(model.parameters(), lr=args.lr)
+	optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 else:
-	optimizer = optim.RMSprop(model.parameters(), lr=args.lr)
+	optimizer = optim.RMSprop(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.step_size, 0.1)
 
 # define dataloaders
@@ -109,7 +117,7 @@ test_dataset = UPBDataset(args.dataset_dir, train=False)
 
 if args.use_balance:
 	weights = pd.read_csv(os.path.join(args.dataset_dir, "weight.csv")).to_numpy().reshape(-1)
-	weights = torch.DoubleTensor(weights)                                       
+	weights = torch.DoubleTensor(weights)
 	sampler = torch.utils.data.sampler.WeightedRandomSampler(weights, len(weights))
 
 	train_dataloader = DataLoader(
@@ -185,6 +193,8 @@ def run_epoch(dataloader, epoch, train_flag=True):
 				course_logits, disp, depth, flow = model(data)
 
 		# compute steering loss
+		# softmax_output = F.softmax(course_logits, dim=1).clamp(min=1e-3)
+		# log_softmax_output = torch.log(softmax_output)
 		log_softmax_output = F.log_softmax(course_logits, dim=1)
 		loss = criterion(log_softmax_output, data["rel_course"])
 
@@ -247,6 +257,9 @@ if __name__ == "__main__":
 				best_scores=[('best_score', best_score)]
 		)
 
+	# define early stopping
+	early_stopping = EarlyStopping(patience=args.patience)
+
 	for epoch in tqdm(range(start_epoch, args.num_epochs)):
 		model.train()
 		train_loss = run_epoch(train_dataloader, epoch=epoch, train_flag=True)
@@ -264,7 +277,8 @@ if __name__ == "__main__":
 
 		if epoch % args.save_interval == 0 and (best_score is None or best_score > test_loss):
 			best_score = test_loss
-			ckpt_name = os.path.join(args.vis_dir, experiment, "ckpts", "default.pth")
+			name = "epoch: %d; tloss: %.2f; vloss: %.2f.pth" % (epoch, train_loss, test_loss)
+			ckpt_name = os.path.join(args.vis_dir, experiment, "ckpts", name)
 			save_ckpt(
 				ckpt_name, 
 				models=[('model', model)], 
@@ -276,6 +290,12 @@ if __name__ == "__main__":
 			)
 			print("Model saved!")
 
+		# learning rate scheduler step
 		scheduler.step()
+
+		# early stopping
+		early_stopping(test_loss)
+		if early_stopping.early_stop == True:
+			break
 
 writer.close()

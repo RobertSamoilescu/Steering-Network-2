@@ -1,0 +1,9 @@
+backup
+dataset
+logs
+pipeline/models
+raw_dataset
+run_train2.sh
+run_train3.sh
+scene_splits
+snapshots

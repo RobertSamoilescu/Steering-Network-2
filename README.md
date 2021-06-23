@@ -44,10 +44,8 @@ mkdir scene_splits
 In the "scene_splits" directory you should have: "train_scenes.txt" and "test_scenes.txt".
 
 ```
-cd scripts
-
 # create the dataset
-python3 create_dataset.py --root_dir ../raw_dataset
+python -m scripts.create_dataset --src_dir raw_dataset --dst_dir dataset
 
 # split the dataset into train-test
 python3 split_dataset.py --train ../scene_splits/train_scenes.txt --test ../scene_splits/test_scenes.txt
